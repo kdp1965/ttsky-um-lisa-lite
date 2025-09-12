@@ -26,7 +26,6 @@ project:
     - "lisa_qspi_controller.v"
     - "lisa_rx8n.v"
     - "lisa_tx8n.v"
-    - "lisa_i2c.v"
     - "debug_ctrl.v"
     - "debug_autobaud.v"
     - "debug_brg.v"
