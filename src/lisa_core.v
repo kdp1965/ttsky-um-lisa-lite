@@ -151,7 +151,7 @@ Uses a 14 (or 16) bit program word.  Shown is the 14-bit version.  For 16-bit, e
 */
 
 `define PWORD_SIZE      16
-`define WANT_BF16
+//`define WANT_BF16
 
 module lisa_core
 #(
@@ -437,8 +437,10 @@ module lisa_core
    reg                        op_xor_r;
    reg                        op_ldax_r;
 
-`ifdef WANT_BF16
    wire                       op_fops;
+   reg                        op_fdiv_r;
+   wire                       fdiv_ready;
+`ifdef WANT_BF16
    wire                       op_tfa;
    wire                       op_taf;
    wire                       op_fmul;
@@ -452,7 +454,6 @@ module lisa_core
    reg                        op_tfa_r;
    reg                        op_taf_r;
    reg                        op_fmul_r;
-   reg                        op_fdiv_r;
    reg                        op_fadd_r;
    reg                        op_fneg_r;
    reg                        op_fswap_r;
@@ -468,7 +469,6 @@ module lisa_core
    reg   [15:0]               fx[3:0];
    wire  [15:0]               fmul_result;
    wire  [15:0]               fdiv_result;
-   wire                       fdiv_ready;
    wire                       fdiv_complete;
    wire                       fdiv_valid;
    wire  [15:0]               fadd_result;
@@ -763,15 +763,19 @@ module lisa_core
                    op_ldc_r ||
                    op_cpx_ra_r ||
                    op_cpx_sp_r ||      // cpx
-                   op_restc_r ||       // Restore c
+`ifdef WANT_BF16
                    op_fcmp_r ||        // Floating point compare
-                   op_fdiv_r;          // FP divide = TRUE if valid
+                   op_fdiv_r ||        // FP divide = TRUE if valid
+`endif
+                   op_restc_r;         // Restore c
 
    // Sign wires for facc and fx
+`ifdef WANT_BF16
    wire  s_facc;
    wire  s_fx;
    assign s_facc = facc[15];
    assign s_fx   = fx[inst[1:0]][15];
+`endif
 
    // Create value to load to cflag
    always @*
@@ -797,6 +801,7 @@ module lisa_core
       op_cpx_ra: c_val                 = ix < ra;
       op_cpx_sp: c_val                 = ix < sp[D_BITS-1:0];
       op_restc_r:c_val                 = cflag_save;
+`ifdef WANT_BF16
       op_fdiv_r: c_val                 = fdiv_valid;
       op_fcmp_r:
             begin
@@ -811,6 +816,7 @@ module lisa_core
                else
                   c_val = 1'b0;
             end
+`endif
       endcase
    end
 
@@ -896,6 +902,7 @@ module lisa_core
          op_or_r <= 1'b0;
          op_xor_r <= 1'b0;
          op_ldax_r <= 1'b0;
+         op_fdiv_r <= 1'b0;
 `ifdef WANT_BF16
          op_tfa_r <= 1'b0;
          op_taf_r <= 1'b0;
@@ -994,6 +1001,8 @@ module lisa_core
          op_itof_r <= op_itof;
          op_ftoi_r <= op_ftoi;
          op_fcmp_r <= op_fcmp;
+`else
+         op_fdiv_r <= 1'b0;
 `endif
       end
    end
@@ -1612,7 +1621,9 @@ module lisa_core
                                                                (inst[0] ? cflag : ~zflag) :
                                                                 inst[0]};
                op_notz_r:             {zflag_load, zflag_val} = {1'b1, acc != 8'h00};
+`ifdef WANT_BF16
                op_fcmp_r:             {zflag_load, zflag_val} = {1'b1, facc == fx[inst[1:0]]};
+`endif
             endcase
       end
    end
@@ -2060,6 +2071,9 @@ module lisa_core
       .isReady_o       ( fdiv_ready      )
    );
    assign fdiv_complete = !op_fdiv_r | fdiv_ready;
+`else
+    assign op_fops = 1'b0;
+    assign fdiv_ready = 1'b0;
 `endif
 
 `ifdef SIMULATION
