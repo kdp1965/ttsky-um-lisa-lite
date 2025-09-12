@@ -1,40 +1,95 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
+# ==================================================
+# Write a byte to the UART
+# ==================================================
+async def send_tx_byte(dut, data):
+   count = 0
+
+   # Wait for the UART TX to be ready 
+   while not dut.tx_buf_empty.value and count < 80000:
+      await ClockCycles(dut.clk, 1)
+      count = count + 1
+
+   # Test for timeout
+   assert count != 20000
+
+   # Configure the write
+   dut.tx_d.value = data
+   dut.tx_wr.value = 1
+   await ClockCycles(dut.clk, 2)
+
+   dut.tx_wr.value = 0
+   await ClockCycles(dut.clk, 2)
+
+# ==================================================
+# Read a byte from the UART
+# ==================================================
+async def read_rx_byte(dut):
+   count = 0
+
+   # Wait for the UART TX to be ready 
+   while not dut.rx_avail.value and count < 80000:
+      await ClockCycles(dut.clk, 1)
+      count = count + 1
+
+   # Test for timeout
+   assert count != 20000
+
+   # Perform a read
+   retval = dut.rx_d.value
+   dut.rx_rd.value = 1
+   await ClockCycles(dut.clk, 1)
+
+   dut.rx_rd.value = 0
+   await ClockCycles(dut.clk, 1)
+   return retval
 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
-
-    # Set the clock period to 10 us (100 KHz)
+async def test_lisa(dut):
+    dut._log.info("start")
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
-    # Reset
-    dut._log.info("Reset")
+    dut._log.info("ena")
     dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
+    dut.porta_in.value = 0
+    dut.uart_port_sel.value = 0
+    dut.tx_wr.value = 0
+    dut.rx_rd.vauee = 0
+    dut.tx_d.value  = 0
+
+    dut._log.info("reset")
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
+
     dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 32)
 
-    dut._log.info("Test project behavior")
+    # Send a \n character to set the Baud rate
+    await send_tx_byte(dut, 0x0a)
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+    # Wait a while for baud rate determination
+    await ClockCycles(dut.clk, 131072)
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+    # ======================================================
+    # Send CR to the debug interface and test for response
+    # ======================================================
+    await send_tx_byte(dut, 0x0a)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+    # Read the LF
+    retval = await read_rx_byte(dut)
+    dut._log.info(f'retval = 0x{int(retval):02x}')
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    # Read the CR
+    retval = await read_rx_byte(dut)
+    dut._log.info(f'retval = 0x{int(retval):02x}')
+
+    # Read the CR
+    retval = await read_rx_byte(dut)
+    dut._log.info(f'retval = 0x{int(retval):02x}')
+
+    dut._log.info("all good!")
+
