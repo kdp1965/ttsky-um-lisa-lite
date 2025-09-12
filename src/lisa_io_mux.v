@@ -243,8 +243,6 @@ module lisa_io_mux
    assign periph_sel2[6] = 1'b0;
    assign periph_sel2[7] = 1'b0;
    
-   assign ttlc_in_data = ui_in[7:4];
-
    // ==============================================================
    // Assign final output pins from the generated MUXes
    // ==============================================================
