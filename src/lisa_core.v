@@ -473,6 +473,12 @@ module lisa_core
    wire                       fdiv_valid;
    wire  [15:0]               fadd_result;
    wire  [7:0]                f_half[1:0];
+`else
+   wire  [15:0]               facc = 0;
+   wire  [15:0]               f0 = 0;
+   wire  [15:0]               f1 = 0;
+   wire  [15:0]               f2 = 0;
+   wire  [15:0]               f3 = 0;
 `endif
    reg   [1:0]                div_args;
    (* keep = "true" *)
