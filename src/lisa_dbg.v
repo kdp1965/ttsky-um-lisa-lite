@@ -58,7 +58,7 @@ module lisa_dbg
 #(
       parameter PC_BITS        = 12,
       parameter D_BITS         = 9,
-      parameter DBG_BRKPOINTS  = 6
+      parameter DBG_BRKPOINTS  = 4
 )
 (
    input                      clk,
