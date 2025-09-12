@@ -39,7 +39,6 @@ project:
     - "lampFPU_fractDiv.sv"
     - "fops_ftoi.v"
     - "lampFPU_utils.v"
-    - "lisa_div.v"
 
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.

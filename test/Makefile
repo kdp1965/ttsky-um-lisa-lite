@@ -5,7 +5,30 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES =  tt_um_lisa_lite.v
+PROJECT_SOURCES += ram.v
+PROJECT_SOURCES += lisa_core.v
+PROJECT_SOURCES += lisa_dbg.v
+PROJECT_SOURCES += lisa_div.v
+PROJECT_SOURCES += lisa_periph.v
+PROJECT_SOURCES += lisa_io_mux.v
+PROJECT_SOURCES += lisa_qqspi.v
+PROJECT_SOURCES += lisa_qspi_controller.v
+PROJECT_SOURCES += lisa_rx8n.v
+PROJECT_SOURCES += lisa_tx8n.v
+PROJECT_SOURCES += debug_ctrl.v
+PROJECT_SOURCES += debug_autobaud.v
+PROJECT_SOURCES += debug_brg.v
+PROJECT_SOURCES += debug_regs.v
+PROJECT_SOURCES += data_cache8.v
+PROJECT_SOURCES += inst_cache.v
+PROJECT_SOURCES += lisa_uart.v
+PROJECT_SOURCES += fops.v
+PROJECT_SOURCES += lampFPU_div_top.sv
+PROJECT_SOURCES += lampFPU_div.sv
+PROJECT_SOURCES += lampFPU_fractDiv.sv
+PROJECT_SOURCES += fops_ftoi.v
+PROJECT_SOURCES += lampFPU_utils.v
 
 ifneq ($(GATES),yes)
 
