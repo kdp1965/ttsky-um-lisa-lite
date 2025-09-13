@@ -64,7 +64,7 @@ SUCH DAMAGE.
 //
 // ==============================================================================
 
-`define WANT_UART2
+//`define WANT_UART2
 
 module tt_um_lisa_lite
 (
@@ -315,7 +315,9 @@ module tt_um_lisa_lite
    (
       .clk                       ( clk                       ),
       .rst_n                     ( rst_n_r[2]                ),
+`ifdef WANT_UART2
       .rst_async_n               ( rst_async_n_r[2]          ),
+`endif
       .reset                     ( dbg_reset                 ),
                                                              
       // Instruction bus                                     
@@ -336,8 +338,8 @@ module tt_um_lisa_lite
       .d_valid                   ( d_valid_c                 ),
       .d_ready                   ( d_ready & d_addr_good     ),
 
-      .int_i                     ( int_vec                   ),
-      .int_en                    ( int_en_vec                ),
+//      .int_i                     ( int_vec                   ),
+//      .int_en                    ( int_en_vec                ),
                                                              
       // Debug bus                                           
       .dbg_a                     ( dbg_a                     ),
@@ -577,7 +579,7 @@ module tt_um_lisa_lite
       .ttlc_xfer_done            (                           ), // Total xfer_len transfer is done
       .ttlc_valid                ( 1'b0                      ), // Indicates a valid request
       .ttlc_xfer_len             ( 4'h0                      ), // Number of 32-bit words to transfer
-      .ttlc_ce_ctrl              ( 'h0                       ),
+      .ttlc_ce_ctrl              ( 2'h0                      ),
 
       // Interface to the qqspi controller
       .addr                      ( addr                      ), // 8Mx32

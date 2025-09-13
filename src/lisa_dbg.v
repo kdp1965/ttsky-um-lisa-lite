@@ -58,7 +58,7 @@ module lisa_dbg
 #(
       parameter PC_BITS        = 12,
       parameter D_BITS         = 9,
-      parameter DBG_BRKPOINTS  = 4
+      parameter DBG_BRKPOINTS  = 6
 )
 (
    input                      clk,
@@ -75,12 +75,6 @@ module lisa_dbg
    input  wire                zflag,
    input  wire                cflag,
 
-   input  wire [15:0]         f0,
-   input  wire [15:0]         f1,
-   input  wire [15:0]         f2,
-   input  wire [15:0]         f3,
-   input  wire [15:0]         facc,
-
    // Signal to processor to stop execution
    output wire                stop,
    output reg                 cont_q,
@@ -89,6 +83,7 @@ module lisa_dbg
    output wire [D_BITS-1:0]   d_addr,
    output wire [7:0]          d_o,
    output wire                d_access,
+   output reg                 d_access_r,
    input  wire [7:0]          d_i,
    output wire                d_periph,
    output reg                 d_rd,
@@ -115,7 +110,7 @@ module lisa_dbg
    reg  [PC_BITS:0]  brk_r5;
 `endif
    reg               brk_halt;
-   reg               d_access_r;
+//   reg               d_access_r;
    reg               d_active_r;
    reg  [1:0]        access_state;
    reg  [D_BITS:0]   d_addr_r;
@@ -176,7 +171,7 @@ module lisa_dbg
                halted <= 1'b1;
          end
 
-         d_access_r <= d_access;
+         d_access_r <= d_access && (dbg_a != 8'h7);
          d_active_r <= d_active;
 
          // Breakpoint register write
@@ -293,17 +288,6 @@ module lisa_dbg
 `else
                dbg_do = brk_r[dbg_a[1:0]];
 `endif
-         endcase
-      end
-      else if (dbg_a[7:4] == 4'h3)
-      begin
-         case (dbg_a)
-         0:    dbg_do = f0;
-         1:    dbg_do = f1;
-         2:    dbg_do = f2;
-         3:    dbg_do = f3;
-         4:    dbg_do = facc;
-         default: dbg_do = 16'h0;
          endcase
       end
    end

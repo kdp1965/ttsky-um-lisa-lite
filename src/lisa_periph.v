@@ -28,8 +28,8 @@ SUCH DAMAGE.
 ==============================================================================
 */
 
-`define TIMER2
-`define WANT_UART2
+//`define TIMER2
+//`define WANT_UART2
 
 /*
 ==========================================================================================
@@ -174,7 +174,7 @@ module lisa_periph
          porta_int0   <= 8'h00;
          porta_int1   <= 8'h00;
          portb        <= 8'h00;
-         portc        <= 4'h00;
+         portc        <= 4'h0;
          portc_dir    <= 4'h0;
          ms_prediv    <= 16'd29494;
          ms_count     <= 16'h0;
